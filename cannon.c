@@ -9,7 +9,6 @@
 
 extern int CANNON_SPEED;
 extern int AMMUNITION;
-extern int BUILDING_WIDTH;
 extern int CANNON_WIDTH;
 extern int MIN_COOLDOWN_TIME;
 extern int MAX_COOLDOWN_TIME;
@@ -59,38 +58,30 @@ void *moveCannon(void *arg)
     while (1)
     {
         // Verifica se o canhão está em cima da ponte
-        if (cannonInfo->rect.x + CANNON_WIDTH > BUILDING_WIDTH && cannonInfo->rect.x < BUILDING_WIDTH + BRIDGE_WIDTH)
+        if (cannonInfo->rect.x + CANNON_WIDTH > 0 && cannonInfo->rect.x < BRIDGE_WIDTH)
         {
-            // se estiver, bloqueia a passagem na ponte para os demais canhões
             pthread_mutex_lock(&bridgeMutex);
 
-            // enquanto estiver em cima da ponte, se desloca para sair dela enquanto outros canhões estão bloqueados
             while (
-                cannonInfo->rect.x + CANNON_WIDTH > BUILDING_WIDTH &&
-                cannonInfo->rect.x < BUILDING_WIDTH + BRIDGE_WIDTH)
+                cannonInfo->rect.x + CANNON_WIDTH > 0 &&
+                cannonInfo->rect.x < BRIDGE_WIDTH)
             {
-                // se estiver sem munição, se desloca em direção ao depósito (esquerda)
                 if (cannonInfo->ammunition == 0)
                     cannonInfo->rect.x -= abs(cannonInfo->speed);
                 else
                     cannonInfo->rect.x += abs(cannonInfo->speed);
 
-                // Espera 10ms pra controlar a velocidade
                 SDL_Delay(10);
             }
 
-            // quando terminar a passagem pela ponte, libera o mutex da ponte
             pthread_mutex_unlock(&bridgeMutex);
         }
 
         if (cannonInfo->ammunition == 0)
         {
-            // se está sem munição, desloca-se para o depósito
-            if (cannonInfo->rect.x < BUILDING_WIDTH - CANNON_WIDTH)
+            if (cannonInfo->rect.x < 0)
             {
-                // se está no depósito, libera o semáforo para a thread produtora de munições
                 sem_post(&cannonInfo->ammunition_semaphore_empty);
-                // espera até a munição ser recarregada
                 sem_wait(&cannonInfo->ammunition_semaphore_full);
             }
             else
@@ -98,7 +89,6 @@ void *moveCannon(void *arg)
                 cannonInfo->rect.x -= abs(cannonInfo->speed);
             }
         }
-
         else
         {
             Uint32 currentTime = SDL_GetTicks();
@@ -117,13 +107,12 @@ void *moveCannon(void *arg)
             cannonInfo->rect.x += cannonInfo->speed;
 
             // Se o canhão alcançar os limites, inverte a direção
-            if (cannonInfo->rect.x + CANNON_WIDTH > SCREEN_WIDTH - BUILDING_WIDTH)
+            if (cannonInfo->rect.x + CANNON_WIDTH > SCREEN_WIDTH)
                 cannonInfo->speed = -CANNON_SPEED;
-            else if (cannonInfo->rect.x <= BUILDING_WIDTH + BRIDGE_WIDTH)
+            else if (cannonInfo->rect.x <= BRIDGE_WIDTH)
                 cannonInfo->speed = CANNON_SPEED;
         }
 
-        // Espera 10ms pra controlar a velocidade
         SDL_Delay(10);
     }
 

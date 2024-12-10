@@ -5,17 +5,11 @@
 #include "helicopter.h"
 #include "scenario.h"
 
-extern int currentHostages;
-extern int rescuedHostages;
 extern int HELICOPTER_WIDTH;
 extern int BUILDING_WIDTH;
-extern int NUM_HOSTAGES;
 extern int SCREEN_WIDTH;
-extern int BUILDING_WIDTH;
 extern int SCREEN_HEIGHT;
 extern int AMMUNITION;
-extern ScenarioElementInfo rightBuilding;
-extern ScenarioElementInfo leftBuilding;
 extern bool destroyed;
 
 // Função pra criar um helicótero
@@ -132,10 +126,8 @@ void *moveMissiles(void *arg)
 
     while (1)
     {
-
         if (missileInfo->active)
         {
-            // Atualiza as posições lógicas do míssil se estiver ativo
             missileInfo->rect.x += (int)(missileInfo->speed * cos(missileInfo->angle));
             missileInfo->rect.y -= (int)(missileInfo->speed * sin(missileInfo->angle));
 
@@ -144,13 +136,9 @@ void *moveMissiles(void *arg)
                 missileInfo->rect.x < 0 ||
                 missileInfo->rect.x > SCREEN_WIDTH ||
                 missileInfo->rect.y < 0 ||
-                missileInfo->rect.y > SCREEN_HEIGHT ||
-                SDL_HasIntersection(&missileInfo->rect, &rightBuilding.rect) ||
-                SDL_HasIntersection(&missileInfo->rect, &leftBuilding.rect))
+                missileInfo->rect.y > SCREEN_HEIGHT)
             {
                 missileInfo->active = false;
-
-                // se o míssil não estiver mais ativo, destrói sua thread
                 pthread_cancel(missileInfo->thread);
             }
         }

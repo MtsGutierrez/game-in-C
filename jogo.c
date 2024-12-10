@@ -210,13 +210,11 @@ int main(int argc, char *argv[])
         }
 
         if (!gameover) {
-            // Chama a função que renderiza o jogo na tela
             render(renderer, &cannon1Info, &cannon2Info, &helicopterInfo);
         }
         else 
         {
-            if (rescuedHostages == NUM_HOSTAGES) printf("Parabéns! Você resgatou todos os reféns e venceu o jogo!");
-            else printf("Você perdeu! Seu helicóptero foi destruído e ainda restavam reféns a serem resgatados.");
+            printf("Você perdeu! Seu helicóptero foi destruído!");
             quit = 1;
         };
     }
