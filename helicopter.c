@@ -6,7 +6,6 @@
 #include "scenario.h"
 
 extern int HELICOPTER_WIDTH;
-extern int BUILDING_WIDTH;
 extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
 extern int AMMUNITION;

@@ -174,7 +174,14 @@ int main(int argc, char *argv[])
     rectArray[1] = &cannon2Info.rect;
     rectArray[2] = &groundInfo.rect;
 
-    HelicopterInfo helicopterInfo = createHelicopter(SCREEN_WIDTH - BUILDING_WIDTH, SCREEN_HEIGHT - BUILDING_HEIGHT - GROUND_HEIGHT - HELICOPTER_HEIGHT * 1.5, HELICOPTER_WIDTH, HELICOPTER_HEIGHT, HELICOPTER_SPEED, rectArray);
+    HelicopterInfo helicopterInfo = createHelicopter(
+        SCREEN_WIDTH - HELICOPTER_WIDTH,
+        SCREEN_HEIGHT - GROUND_HEIGHT - HELICOPTER_HEIGHT * 1.5,
+        HELICOPTER_WIDTH,
+        HELICOPTER_HEIGHT,
+        HELICOPTER_SPEED,
+        rectArray
+    );
     loadHelicopterSprite(&helicopterInfo, renderer);
    
     MoveCannonThreadParams paramsCannon1;
