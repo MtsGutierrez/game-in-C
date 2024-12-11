@@ -62,11 +62,11 @@ void render(SDL_Renderer *renderer, DinoInfo *dino1Info, DinoInfo *dino2Info, He
 int getDifficultyChoice() {
     int choice;
 
-    printf("Escolha a dificuldade do jogo:\n");
+    printf("======= Qual a dificuldade do jogo ? =======\n");
     printf("1 - Fácil\n");
     printf("2 - Médio\n");
     printf("3 - Difícil\n");
-    printf("Escolha digitando 1, 2 ou 3: ");
+    printf("Digite 1, 2 ou 3: ");
 
     while (1) {
         if (scanf("%d", &choice) != 1) {
@@ -121,7 +121,6 @@ int main(int argc, char *argv[])
     loadScenarioSpritesheet(renderer, &background, "sprites/background_spritesheet.png");
     loadScenarioSpritesheet(renderer, &groundInfo, "sprites/ground_spritesheet.png");
 
-    // Cria os dinossauros
     DinoInfo dino1Info = createDino(
         SCREEN_WIDTH/3, 
         SCREEN_HEIGHT - GROUND_HEIGHT - DINO_HEIGHT, 
@@ -170,7 +169,6 @@ int main(int argc, char *argv[])
     pthread_create(&thread_dino2, NULL, moveDino, &paramsDino2);                    // thread do dinossauro 2
     pthread_create(&thread_helicopter, NULL, moveHelicopter, &helicopterInfo);            // thread do helicóptero
 
-    srand(time(NULL)); // Seed pra gerar números aleatórios usados no cálculo do ângulo do míssil
     
     int quit = 0;
     SDL_Event e;
