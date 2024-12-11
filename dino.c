@@ -8,6 +8,9 @@
 
 extern int DINO_SPEED;
 extern int SCREEN_WIDTH;
+extern int SCREEN_HEIGHT;
+extern int DINO_WIDTH;
+extern int DINO_HEIGHT;
 
 // Função pra criar um dinossauro
 DinoInfo createDino(int x, int y, int w, int h)
@@ -124,4 +127,16 @@ void addDino(DinoManager* manager, int x) {
     loadDinoSprite(&manager->dinos[idx], manager->renderer);
     manager->threadActives[idx] = true;
     manager->numDinos++;
+}
+
+void* spawnNewDinos(void* arg) {
+    DinoManager* manager = (DinoManager*)arg;
+    while (1) {
+        SDL_Delay(10000); // 10 segundos
+        if (manager->numDinos < manager->maxDinos) {
+            int x = rand() % (SCREEN_WIDTH - DINO_WIDTH);
+            addDino(manager, x);
+        }
+    }
+    return NULL;
 }

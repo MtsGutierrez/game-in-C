@@ -164,15 +164,16 @@ int main(int argc, char *argv[])
     loadScenarioSpritesheet(renderer, &background, "sprites/background_spritesheet.png");
     loadScenarioSpritesheet(renderer, &groundInfo, "sprites/ground_spritesheet.png");
 
-    DinoManager* manager = createDinoManager(renderer, 2, SCREEN_HEIGHT - GROUND_HEIGHT);
+    DinoManager* manager = createDinoManager(renderer, MAX_DINOS, GROUND_HEIGHT);
     setupDifficulty(difficulty, manager);
 
     // Inicializa o array de colisões para o helicóptero
-    SDL_Rect **rectArray = (SDL_Rect **)malloc(sizeof(SDL_Rect *) * 3);
+    SDL_Rect **rectArray = (SDL_Rect **)malloc(sizeof(SDL_Rect *) * (MAX_DINOS + 1));
 
-    rectArray[0] = &manager->dinos[0].rect;
-    rectArray[1] = &manager->dinos[1].rect;
-    rectArray[2] = &groundInfo.rect;
+    for (int i = 0; i < manager->numDinos; i++) {
+        rectArray[i] = &manager->dinos[i].rect;
+    }
+    rectArray[manager->numDinos] = &groundInfo.rect;
 
     HelicopterInfo helicopterInfo = createHelicopter(
         SCREEN_WIDTH - HELICOPTER_WIDTH,

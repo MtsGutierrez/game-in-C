@@ -50,4 +50,6 @@ void *moveDino(void *arg);
 void loadDinoSprite(DinoInfo *dino, SDL_Renderer* renderer);
 void drawDino(DinoInfo* dino, SDL_Renderer* renderer);
 
+void* spawnNewDinos(void* arg);
+
 #endif /* DINO_H */ 
