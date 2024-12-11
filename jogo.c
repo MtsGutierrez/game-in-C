@@ -51,7 +51,8 @@ void render(SDL_Renderer *renderer, DinoInfo *dino1Info, DinoInfo *dino2Info, He
         drawExplosion(
             renderer,
             helicopterInfo->rect.x + (helicopterInfo->rect.w / 2),
-            helicopterInfo->rect.y + (helicopterInfo->rect.h / 2)
+            helicopterInfo->rect.y + (helicopterInfo->rect.h / 2),
+            EXPLOSION_SIZE
         );
         gameover = true;
     }
