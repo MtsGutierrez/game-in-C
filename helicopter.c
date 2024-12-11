@@ -8,7 +8,6 @@
 extern int HELICOPTER_WIDTH;
 extern int SCREEN_WIDTH;
 extern int SCREEN_HEIGHT;
-extern int AMMUNITION;
 extern bool destroyed;
 
 // Função pra criar um helicótero
@@ -23,27 +22,6 @@ HelicopterInfo createHelicopter(int x, int y, int w, int h, int speed, SDL_Rect 
     helicopterInfo.fixed_collision_rects = collisionRectArray;
     helicopterInfo.currentMovement = 0;
     return helicopterInfo;
-}
-
-void addHelicopterCollisionMissile(HelicopterInfo *helicopter, MissileInfo *missile)
-{
-    helicopter->missile_collision_rects[helicopter->num_missile_collision_rects] = missile;
-    helicopter->num_missile_collision_rects++;
-}
-
-void checkMissileCollisions(SDL_Rect helicopterRect, MissileInfo *missiles[], int missiles_length)
-{
-    for (int i = 0; i < missiles_length; i++)
-    {
-        if (&missiles[i]->active)
-        {
-            SDL_Rect *collisionRect = &missiles[i]->rect;
-            if (SDL_HasIntersection(&helicopterRect, collisionRect))
-            {
-                destroyed = true;
-            }
-        }
-    }
 }
 
 void checkHelicopterCollisions(SDL_Rect helicopterRect, SDL_Rect *rects[], int rects_length)
@@ -67,7 +45,7 @@ void checkHelicopterCollisions(SDL_Rect helicopterRect, SDL_Rect *rects[], int r
     }
 }
 
-// Função concorrente para mover o helicótero que é controlado pelo usuário
+// Função concorrente para mover o helicóptero que é controlado pelo usuário
 void *moveHelicopter(void *arg)
 {
     HelicopterInfo *helicopterInfo = (HelicopterInfo *)arg;
@@ -103,43 +81,7 @@ void *moveHelicopter(void *arg)
             helicopterInfo->fixed_collision_rects,
             3);
 
-        // checa colisão com os mísseis
-        checkMissileCollisions(
-            helicopterInfo->rect,
-            helicopterInfo->missile_collision_rects,
-            helicopterInfo->num_missile_collision_rects);
-
         // Espera 10ms pra controlar a velocidade
-        SDL_Delay(10);
-    }
-
-    return NULL;
-}
-
-// Função concorrente para mover os mísseis
-void *moveMissiles(void *arg)
-{
-    MissileInfo *missileInfo = (MissileInfo *)arg;
-
-    while (1)
-    {
-        if (missileInfo->active)
-        {
-            missileInfo->rect.x += (int)(missileInfo->speed * cos(missileInfo->angle));
-            missileInfo->rect.y -= (int)(missileInfo->speed * sin(missileInfo->angle));
-
-            // Desativa o míssil se ele sair da tela
-            if (
-                missileInfo->rect.x < 0 ||
-                missileInfo->rect.x > SCREEN_WIDTH ||
-                missileInfo->rect.y < 0 ||
-                missileInfo->rect.y > SCREEN_HEIGHT)
-            {
-                missileInfo->active = false;
-                pthread_cancel(missileInfo->thread);
-            }
-        }
-
         SDL_Delay(10);
     }
 
@@ -171,7 +113,6 @@ void drawHelicopter(HelicopterInfo *helicopter, SDL_Renderer* renderer) {
         angleDirection = 0;
     }
 
-    // Modificar para usar apenas uma linha do spritesheet (sem reféns)
     SDL_Rect srcrect = {(ms % 4) * 100, 0, 100, 50};
     SDL_RenderCopyEx(renderer, helicopter->texture, &srcrect, &helicopter->rect, angleDirection, NULL, helicopterHorizontalDirection);
 }

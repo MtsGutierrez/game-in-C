@@ -72,65 +72,6 @@ void *moveCannon(void *arg)
     return NULL;
 }
 
-// thread para os depósitos produtores de munição
-void *reloadCannonAmmunition(void *arg)
-{
-    MoveCannonThreadParams *params = (MoveCannonThreadParams *)arg;
-    CannonInfo *cannonInfo = params->cannonInfo;
-    HelicopterInfo *helicopterInfo = params->helicopterInfo;
-
-    while (1)
-    {
-        // espera até sinalizar que a munição está vazia
-        sem_wait(&cannonInfo->ammunition_semaphore_empty);
-
-        if (cannonInfo->ammunition == 0)
-        {
-            for (int i = 0; i <= AMMUNITION; i++)
-            {
-                SDL_Delay(RELOAD_TIME_FOR_EACH_MISSILE);
-                cannonInfo->ammunition += 1;
-            }
-        }
-
-        // libera o array de threads dos mísseis ativos e de retângulos de colisão
-        cannonInfo->numActiveMissiles = 0;
-        helicopterInfo->num_missile_collision_rects = 0;
-
-        // sinaliza que finalizou a produção da munição
-        sem_post(&cannonInfo->ammunition_semaphore_full);
-    }
-}
-
-// Função pra criar um míssil
-void createMissile(CannonInfo *cannon, HelicopterInfo *helicopter)
-{
-    if (cannon->ammunition == 0)
-    {
-        return;
-    }
-
-    MissileInfo *missile = &cannon->missiles[cannon->numActiveMissiles];
-    missile->rect.w = MISSILE_WIDTH;
-    missile->rect.h = MISSILE_HEIGHT;
-    missile->rect.x = cannon->rect.x + (CANNON_WIDTH - MISSILE_WIDTH) / 2;
-    missile->rect.y = cannon->rect.y;
-    missile->speed = MISSILE_SPEED;
-    missile->active = true;
-    missile->angle = ((rand() % 120) * M_PI / 180.0);
-
-    // cria a thread desse míssil
-    pthread_t newThread;
-    pthread_create(&newThread, NULL, moveMissiles, &cannon->missiles[cannon->numActiveMissiles]);
-    missile->thread = newThread;
-
-    // adiciona o míssil no array de colisores do helicóptero
-    addHelicopterCollisionMissile(helicopter, &cannon->missiles[cannon->numActiveMissiles]);
-
-    cannon->numActiveMissiles++;
-    cannon->ammunition--;
-}
-
 void loadCannonSprite(CannonInfo *cannon, SDL_Renderer* renderer) {
     SDL_Surface * image = IMG_Load("sprites/cannon_spritesheet.png");
     cannon->texture = SDL_CreateTextureFromSurface(renderer, image);
