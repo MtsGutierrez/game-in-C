@@ -25,8 +25,6 @@ const int EXPLOSION_SIZE = 75;
 const int HELICOPTER_SPEED = 3;
 const int DINO_SPEED = 3;
 
-int RELOAD_TIME_FOR_EACH_MISSILE = 500; // milisegundos
-
 bool destroyed = false;
 bool gameover = false;
 
@@ -90,8 +88,6 @@ int getDifficultyChoice() {
 int main(int argc, char *argv[])
 {
     int difficulty = getDifficultyChoice();
-
-    RELOAD_TIME_FOR_EACH_MISSILE = RELOAD_TIME_FOR_EACH_MISSILE / difficulty;
 
     // Inicializa o SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
