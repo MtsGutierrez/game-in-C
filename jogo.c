@@ -8,7 +8,7 @@
 #include <time.h>
 #include <semaphore.h>
 #include "helicopter.h"
-#include "cannon.h"
+#include "dino.h"
 #include "scenario.h"
 
 // Constantes
@@ -17,13 +17,13 @@ const int SCREEN_HEIGHT = 700;
 const int GROUND_HEIGHT = 100;
 const int BRIDGE_WIDTH = 150;
 const int BRIDGE_HEIGHT = GROUND_HEIGHT;
-const int CANNON_WIDTH = 100;
-const int CANNON_HEIGHT = 50;
+const int DINO_WIDTH = 100;
+const int DINO_HEIGHT = 100;
 const int HELICOPTER_WIDTH = 150;
 const int HELICOPTER_HEIGHT = 75;
 const int EXPLOSION_SIZE = 75;
 const int HELICOPTER_SPEED = 3;
-const int CANNON_SPEED = 2;
+const int DINO_SPEED = 3;
 
 int RELOAD_TIME_FOR_EACH_MISSILE = 500; // milisegundos
 
@@ -35,7 +35,7 @@ ScenarioElementInfo groundInfo;
 
 // Função pra renderizar os objetos
 // Isso não pode ser concorrente porque a tela que o usuário vê é uma zona de exclusão mútua
-void render(SDL_Renderer *renderer, CannonInfo *cannon1Info, CannonInfo *cannon2Info, HelicopterInfo *helicopterInfo)
+void render(SDL_Renderer *renderer, DinoInfo *dino1Info, DinoInfo *dino2Info, HelicopterInfo *helicopterInfo)
 {
     // Limpa a tela
     SDL_RenderClear(renderer);
@@ -43,8 +43,8 @@ void render(SDL_Renderer *renderer, CannonInfo *cannon1Info, CannonInfo *cannon2
     drawScenarioElement(renderer, &background);
     drawScenarioElement(renderer, &groundInfo);
 
-    drawCannon(cannon1Info, renderer);
-    drawCannon(cannon2Info, renderer);
+    drawDino(dino1Info, renderer);
+    drawDino(dino2Info, renderer);
 
     if (destroyed) 
     {
@@ -125,31 +125,29 @@ int main(int argc, char *argv[])
     loadScenarioSpritesheet(renderer, &background, "sprites/background_spritesheet.png");
     loadScenarioSpritesheet(renderer, &groundInfo, "sprites/ground_spritesheet.png");
 
-    // Cria os canhões
-    CannonInfo cannon1Info = createCannon(
+    // Cria os dinossauros
+    DinoInfo dino1Info = createDino(
         SCREEN_WIDTH/3, 
-        SCREEN_HEIGHT - GROUND_HEIGHT - CANNON_HEIGHT, 
-        CANNON_WIDTH, 
-        CANNON_HEIGHT, 
-        0
+        SCREEN_HEIGHT - GROUND_HEIGHT - DINO_HEIGHT, 
+        DINO_WIDTH, 
+        DINO_HEIGHT
     );
 
-    CannonInfo cannon2Info = createCannon(
+    DinoInfo dino2Info = createDino(
         2*SCREEN_WIDTH/3, 
-        SCREEN_HEIGHT - GROUND_HEIGHT - CANNON_HEIGHT, 
-        CANNON_WIDTH, 
-        CANNON_HEIGHT, 
-        0
+        SCREEN_HEIGHT - GROUND_HEIGHT - DINO_HEIGHT, 
+        DINO_WIDTH, 
+        DINO_HEIGHT
     );
     
-    loadCannonSprite(&cannon1Info, renderer);
-    loadCannonSprite(&cannon2Info, renderer);
+    loadDinoSprite(&dino1Info, renderer);
+    loadDinoSprite(&dino2Info, renderer);
 
     // Inicializa o array de colisões para o helicóptero
     SDL_Rect **rectArray = (SDL_Rect **)malloc(sizeof(SDL_Rect *) * 3);
 
-    rectArray[0] = &cannon1Info.rect;
-    rectArray[1] = &cannon2Info.rect;
+    rectArray[0] = &dino1Info.rect;
+    rectArray[1] = &dino2Info.rect;
     rectArray[2] = &groundInfo.rect;
 
     HelicopterInfo helicopterInfo = createHelicopter(
@@ -162,18 +160,18 @@ int main(int argc, char *argv[])
     );
     loadHelicopterSprite(&helicopterInfo, renderer);
    
-    MoveCannonThreadParams paramsCannon1;
-    paramsCannon1.helicopterInfo = &helicopterInfo;
-    paramsCannon1.cannonInfo = &cannon1Info;
+    MoveDinoThreadParams paramsDino1;
+    paramsDino1.helicopterInfo = &helicopterInfo;
+    paramsDino1.dinoInfo = &dino1Info;
 
-    MoveCannonThreadParams paramsCannon2;
-    paramsCannon2.helicopterInfo = &helicopterInfo;
-    paramsCannon2.cannonInfo = &cannon2Info;
+    MoveDinoThreadParams paramsDino2;
+    paramsDino2.helicopterInfo = &helicopterInfo;
+    paramsDino2.dinoInfo = &dino2Info;
 
     // Inicializa as threads
-    pthread_t thread_cannon1, thread_cannon2, thread_helicopter;
-    pthread_create(&thread_cannon1, NULL, moveCannon, &paramsCannon1);                    // thread do canhão 1
-    pthread_create(&thread_cannon2, NULL, moveCannon, &paramsCannon2);                    // thread do canhão 2
+    pthread_t thread_dino1, thread_dino2, thread_helicopter;
+    pthread_create(&thread_dino1, NULL, moveDino, &paramsDino1);                    // thread do dinossauro 1
+    pthread_create(&thread_dino2, NULL, moveDino, &paramsDino2);                    // thread do dinossauro 2
     pthread_create(&thread_helicopter, NULL, moveHelicopter, &helicopterInfo);            // thread do helicóptero
 
     srand(time(NULL)); // Seed pra gerar números aleatórios usados no cálculo do ângulo do míssil
@@ -193,7 +191,7 @@ int main(int argc, char *argv[])
         }
 
         if (!gameover) {
-            render(renderer, &cannon1Info, &cannon2Info, &helicopterInfo);
+            render(renderer, &dino1Info, &dino2Info, &helicopterInfo);
         }
         else 
         {
@@ -205,8 +203,8 @@ int main(int argc, char *argv[])
     free(helicopterInfo.fixed_collision_rects);
 
     // Destrói as threads
-    pthread_cancel(thread_cannon1);
-    pthread_cancel(thread_cannon2);
+    pthread_cancel(thread_dino1);
+    pthread_cancel(thread_dino2);
     pthread_cancel(thread_helicopter);
 
     SDL_DestroyRenderer(renderer);
