@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include "helicopter.h"
 
 #ifndef DINO_H
 #define DINO_H
