@@ -92,6 +92,42 @@ int getDifficultyChoice() {
     return choice;
 }
 
+void setupDifficulty(int difficulty, DinoManager* manager) {
+    switch(difficulty) {
+        case 1: // Fácil
+            addDino(manager, SCREEN_WIDTH/3);
+            addDino(manager, 2*SCREEN_WIDTH/3);
+            break;
+            
+        case 2: // Médio
+            addDino(manager, SCREEN_WIDTH/4);
+            addDino(manager, 2*SCREEN_WIDTH/4);
+            addDino(manager, 3*SCREEN_WIDTH/4);
+            break;
+            
+        case 3: // Difícil
+            addDino(manager, SCREEN_WIDTH/3);
+            addDino(manager, 2*SCREEN_WIDTH/3);
+            
+            // Criar thread para adicionar novos dinos
+            pthread_t spawner_thread;
+            pthread_create(&spawner_thread, NULL, spawnNewDinos, manager);
+            break;
+    }
+}
+
+void* spawnNewDinos(void* arg) {
+    DinoManager* manager = (DinoManager*)arg;
+    while (1) {
+        SDL_Delay(10000); // 10 segundos
+        if (manager->numDinos < manager->maxDinos) {
+            int x = rand() % (SCREEN_WIDTH - DINO_WIDTH);
+            addDino(manager, x);
+        }
+    }
+    return NULL;
+}
+
 int main(int argc, char *argv[])
 {
     int difficulty = getDifficultyChoice();
@@ -128,28 +164,14 @@ int main(int argc, char *argv[])
     loadScenarioSpritesheet(renderer, &background, "sprites/background_spritesheet.png");
     loadScenarioSpritesheet(renderer, &groundInfo, "sprites/ground_spritesheet.png");
 
-    DinoInfo dino1Info = createDino(
-        SCREEN_WIDTH/3, 
-        SCREEN_HEIGHT - GROUND_HEIGHT - DINO_HEIGHT, 
-        DINO_WIDTH, 
-        DINO_HEIGHT
-    );
-
-    DinoInfo dino2Info = createDino(
-        2*SCREEN_WIDTH/3, 
-        SCREEN_HEIGHT - GROUND_HEIGHT - DINO_HEIGHT, 
-        DINO_WIDTH, 
-        DINO_HEIGHT
-    );
-    
-    loadDinoSprite(&dino1Info, renderer);
-    loadDinoSprite(&dino2Info, renderer);
+    DinoManager* manager = createDinoManager(renderer, 2, SCREEN_HEIGHT - GROUND_HEIGHT);
+    setupDifficulty(difficulty, manager);
 
     // Inicializa o array de colisões para o helicóptero
     SDL_Rect **rectArray = (SDL_Rect **)malloc(sizeof(SDL_Rect *) * 3);
 
-    rectArray[0] = &dino1Info.rect;
-    rectArray[1] = &dino2Info.rect;
+    rectArray[0] = &manager->dinos[0].rect;
+    rectArray[1] = &manager->dinos[1].rect;
     rectArray[2] = &groundInfo.rect;
 
     HelicopterInfo helicopterInfo = createHelicopter(
@@ -164,11 +186,11 @@ int main(int argc, char *argv[])
    
     MoveDinoThreadParams paramsDino1;
     paramsDino1.helicopterInfo = &helicopterInfo;
-    paramsDino1.dinoInfo = &dino1Info;
+    paramsDino1.dinoInfo = &manager->dinos[0];
 
     MoveDinoThreadParams paramsDino2;
     paramsDino2.helicopterInfo = &helicopterInfo;
-    paramsDino2.dinoInfo = &dino2Info;
+    paramsDino2.dinoInfo = &manager->dinos[1];
 
     // Inicializa as threads
     pthread_t thread_dino1, thread_dino2, thread_helicopter;
@@ -201,8 +223,8 @@ int main(int argc, char *argv[])
 
         if (!gameover) {
             moveBullets();
-            checkBulletCollisions(&dino1Info, &dino2Info, renderer);
-            render(renderer, &dino1Info, &dino2Info, &helicopterInfo);
+            checkBulletCollisions(&manager->dinos[0], &manager->dinos[1], renderer);
+            render(renderer, &manager->dinos[0], &manager->dinos[1], &helicopterInfo);
         }
         else 
         {
@@ -214,9 +236,9 @@ int main(int argc, char *argv[])
     free(helicopterInfo.fixed_collision_rects);
 
     // Destrói as threads
-    if (thread_dino1_active && dino1Info.alive)
+    if (thread_dino1_active && manager->dinos[0].alive)
         pthread_cancel(thread_dino1);
-    if (thread_dino2_active && dino2Info.alive)
+    if (thread_dino2_active && manager->dinos[1].alive)
         pthread_cancel(thread_dino2);
     pthread_cancel(thread_helicopter);
 

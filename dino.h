@@ -12,9 +12,12 @@ typedef struct
     SDL_Rect rect;
     int speed;
     SDL_Texture *texture;
-    int currentFrame; // Para controlar a animação
-    bool facingLeft; // Para controlar a direção que o dino está olhando
-    bool alive;  // Novo campo para controlar se o dino está vivo
+    int currentFrame;
+    bool facingLeft;
+    bool alive;
+    bool isJumping;
+    int jumpHeight;
+    int originalY;
 } DinoInfo;
 
 typedef struct
@@ -22,6 +25,25 @@ typedef struct
     HelicopterInfo *helicopterInfo;
     DinoInfo *dinoInfo;
 } MoveDinoThreadParams;
+
+#define MAX_DINOS 10  // Máximo de dinossauros possível
+
+typedef struct {
+    DinoInfo* dinos;
+    int numDinos;
+    int maxDinos;
+    SDL_Renderer* renderer;
+    int groundHeight;
+    pthread_t* threads;
+    MoveDinoThreadParams* threadParams;
+    bool* threadActives;
+} DinoManager;
+
+// Funções para gerenciar dinossauros
+DinoManager* createDinoManager(SDL_Renderer* renderer, int maxDinos, int groundHeight);
+void addDino(DinoManager* manager, int x);
+void updateDinos(DinoManager* manager);
+void cleanupDinoManager(DinoManager* manager);
 
 DinoInfo createDino(int x, int y, int w, int h);
 void *moveDino(void *arg);

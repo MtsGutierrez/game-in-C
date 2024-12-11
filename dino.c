@@ -29,20 +29,46 @@ void *moveDino(void *arg)
 {
     MoveDinoThreadParams *params = (MoveDinoThreadParams *)arg;
     DinoInfo *dinoInfo = params->dinoInfo;
+    const int JUMP_MAX_HEIGHT = 150;
+    const int JUMP_SPEED = 5;
+    bool jumpingUp = true;
 
     while (1)
     {
         if (!dinoInfo->alive) {
-            pthread_exit(NULL);  // Termina a thread quando o dino morre
+            pthread_exit(NULL);
         }
 
-        // Atualiza a posição do dinossauro
+        // Movimento horizontal
         dinoInfo->rect.x += dinoInfo->speed;
-
-        // Atualiza a direção que o dino está olhando
         dinoInfo->facingLeft = (dinoInfo->speed < 0);
 
-        // Se o dinossauro alcançar os limites, inverte a direção
+        // Lógica de pulo
+        if (dinoInfo->isJumping) {
+            if (jumpingUp) {
+                dinoInfo->jumpHeight += JUMP_SPEED;
+                if (dinoInfo->jumpHeight >= JUMP_MAX_HEIGHT) {
+                    jumpingUp = false;
+                }
+            } else {
+                dinoInfo->jumpHeight -= JUMP_SPEED;
+                if (dinoInfo->jumpHeight <= 0) {
+                    dinoInfo->isJumping = false;
+                    dinoInfo->rect.y = dinoInfo->originalY;
+                    jumpingUp = true;
+                }
+            }
+            dinoInfo->rect.y = dinoInfo->originalY - dinoInfo->jumpHeight;
+        }
+
+        // Chance aleatória de pular
+        if (!dinoInfo->isJumping && (rand() % 100 < 2)) { // 2% de chance de pular
+            dinoInfo->isJumping = true;
+            dinoInfo->jumpHeight = 0;
+            dinoInfo->originalY = dinoInfo->rect.y;
+        }
+
+        // Inversão de direção nas bordas
         if (dinoInfo->rect.x + dinoInfo->rect.w > SCREEN_WIDTH)
             dinoInfo->speed = -DINO_SPEED;
         else if (dinoInfo->rect.x <= 0)
@@ -70,4 +96,32 @@ void drawDino(DinoInfo *dino, SDL_Renderer* renderer) {
     SDL_RendererFlip flip = dino->facingLeft ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
     
     SDL_RenderCopyEx(renderer, dino->texture, &srcrect, &dino->rect, 0, NULL, flip);
+}
+
+DinoManager* createDinoManager(SDL_Renderer* renderer, int maxDinos, int groundHeight) {
+    DinoManager* manager = (DinoManager*)malloc(sizeof(DinoManager));
+    manager->dinos = (DinoInfo*)malloc(sizeof(DinoInfo) * maxDinos);
+    manager->threads = (pthread_t*)malloc(sizeof(pthread_t) * maxDinos);
+    manager->threadParams = (MoveDinoThreadParams*)malloc(sizeof(MoveDinoThreadParams) * maxDinos);
+    manager->threadActives = (bool*)malloc(sizeof(bool) * maxDinos);
+    manager->numDinos = 0;
+    manager->maxDinos = maxDinos;
+    manager->renderer = renderer;
+    manager->groundHeight = groundHeight;
+    return manager;
+}
+
+void addDino(DinoManager* manager, int x) {
+    if (manager->numDinos >= manager->maxDinos) return;
+    
+    int idx = manager->numDinos;
+    manager->dinos[idx] = createDino(
+        x,
+        SCREEN_HEIGHT - manager->groundHeight - DINO_HEIGHT,
+        DINO_WIDTH,
+        DINO_HEIGHT
+    );
+    loadDinoSprite(&manager->dinos[idx], manager->renderer);
+    manager->threadActives[idx] = true;
+    manager->numDinos++;
 }
