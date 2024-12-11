@@ -21,16 +21,8 @@ const int CANNON_WIDTH = 100;
 const int CANNON_HEIGHT = 50;
 const int HELICOPTER_WIDTH = 150;
 const int HELICOPTER_HEIGHT = 75;
-const int MISSILE_WIDTH = 5;
-const int MISSILE_HEIGHT = 15;
-const int CANNON_SPEED = 2;
-const int HELICOPTER_SPEED = 3;
-const int MISSILE_SPEED = 5;
 const int EXPLOSION_SIZE = 75;
 
-int MIN_COOLDOWN_TIME = 1500;
-int MAX_COOLDOWN_TIME = 4500;
-int AMMUNITION = 10;
 int RELOAD_TIME_FOR_EACH_MISSILE = 500; // milisegundos
 
 pthread_mutex_t bridgeMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -55,26 +47,6 @@ void render(SDL_Renderer *renderer, CannonInfo *cannon1Info, CannonInfo *cannon2
 
     drawCannon(cannon1Info, renderer);
     drawCannon(cannon2Info, renderer);
-
-    // Desenha os mísseis do canhão 1
-    for (int i = 0; i < cannon1Info->numActiveMissiles; i++)
-    {
-        if (cannon1Info->missiles[i].active)
-        {
-            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
-            SDL_RenderFillRect(renderer, &cannon1Info->missiles[i].rect);
-        }
-    }
-
-    // Desenha os mísseis do canhão 2
-    for (int i = 0; i < cannon2Info->numActiveMissiles; i++)
-    {
-        if (cannon2Info->missiles[i].active)
-        {
-            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
-            SDL_RenderFillRect(renderer, &cannon2Info->missiles[i].rect);
-        }
-    }
 
     if (destroyed) 
     {
@@ -121,10 +93,7 @@ int main(int argc, char *argv[])
 {
     int difficulty = getDifficultyChoice();
 
-    AMMUNITION = AMMUNITION * (0.5 * difficulty + 0.5);
     RELOAD_TIME_FOR_EACH_MISSILE = RELOAD_TIME_FOR_EACH_MISSILE / difficulty;
-    MIN_COOLDOWN_TIME = MIN_COOLDOWN_TIME / difficulty;
-    MAX_COOLDOWN_TIME = MAX_COOLDOWN_TIME / difficulty;
 
     // Inicializa o SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -193,12 +162,10 @@ int main(int argc, char *argv[])
     paramsCannon2.cannonInfo = &cannon2Info;
 
     // Inicializa as threads
-    pthread_t thread_cannon1, thread_cannon2, thread_helicopter, thread_reload_cannon1, thread_reload_cannon2;
+    pthread_t thread_cannon1, thread_cannon2, thread_helicopter;
     pthread_create(&thread_cannon1, NULL, moveCannon, &paramsCannon1);                    // thread do canhão 1
     pthread_create(&thread_cannon2, NULL, moveCannon, &paramsCannon2);                    // thread do canhão 2
     pthread_create(&thread_helicopter, NULL, moveHelicopter, &helicopterInfo);            // thread do helicóptero
-    pthread_create(&thread_reload_cannon1, NULL, reloadCannonAmmunition, &paramsCannon1); // thread do depósito do canhão 1
-    pthread_create(&thread_reload_cannon2, NULL, reloadCannonAmmunition, &paramsCannon2); // thread do depósito do canhão 2
 
     srand(time(NULL)); // Seed pra gerar números aleatórios usados no cálculo do ângulo do míssil
     
@@ -235,8 +202,6 @@ int main(int argc, char *argv[])
     pthread_cancel(thread_cannon1);
     pthread_cancel(thread_cannon2);
     pthread_cancel(thread_helicopter);
-    pthread_cancel(thread_reload_cannon1);
-    pthread_cancel(thread_reload_cannon2);
 
     sem_destroy(&cannon1Info.ammunition_semaphore_empty);
     sem_destroy(&cannon2Info.ammunition_semaphore_empty);

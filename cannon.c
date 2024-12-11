@@ -53,7 +53,6 @@ void *moveCannon(void *arg)
 {
     MoveCannonThreadParams *params = (MoveCannonThreadParams *)arg;
     CannonInfo *cannonInfo = params->cannonInfo;
-    HelicopterInfo *helicopterInfo = params->helicopterInfo;
 
     while (1)
     {
@@ -66,52 +65,21 @@ void *moveCannon(void *arg)
                 cannonInfo->rect.x + CANNON_WIDTH > 0 &&
                 cannonInfo->rect.x < BRIDGE_WIDTH)
             {
-                if (cannonInfo->ammunition == 0)
-                    cannonInfo->rect.x -= abs(cannonInfo->speed);
-                else
-                    cannonInfo->rect.x += abs(cannonInfo->speed);
-
+                cannonInfo->rect.x += abs(cannonInfo->speed);
                 SDL_Delay(10);
             }
 
             pthread_mutex_unlock(&bridgeMutex);
         }
 
-        if (cannonInfo->ammunition == 0)
-        {
-            if (cannonInfo->rect.x < 0)
-            {
-                sem_post(&cannonInfo->ammunition_semaphore_empty);
-                sem_wait(&cannonInfo->ammunition_semaphore_full);
-            }
-            else
-            {
-                cannonInfo->rect.x -= abs(cannonInfo->speed);
-            }
-        }
-        else
-        {
-            Uint32 currentTime = SDL_GetTicks();
+        // Atualiza a posição do canhão
+        cannonInfo->rect.x += cannonInfo->speed;
 
-            // gera um cooldown aleatório entre os limites
-            int cooldown = rand() % (MAX_COOLDOWN_TIME + 1 - MIN_COOLDOWN_TIME) + MIN_COOLDOWN_TIME;
-
-            // verifica se está na hora de disparar outro míssil
-            if (currentTime - cannonInfo->lastShotTime >= cooldown)
-            {
-                createMissile(cannonInfo, helicopterInfo);
-                cannonInfo->lastShotTime = currentTime;
-            }
-
-            // Atualiza a posição do canhão
-            cannonInfo->rect.x += cannonInfo->speed;
-
-            // Se o canhão alcançar os limites, inverte a direção
-            if (cannonInfo->rect.x + CANNON_WIDTH > SCREEN_WIDTH)
-                cannonInfo->speed = -CANNON_SPEED;
-            else if (cannonInfo->rect.x <= BRIDGE_WIDTH)
-                cannonInfo->speed = CANNON_SPEED;
-        }
+        // Se o canhão alcançar os limites, inverte a direção
+        if (cannonInfo->rect.x + CANNON_WIDTH > SCREEN_WIDTH)
+            cannonInfo->speed = -CANNON_SPEED;
+        else if (cannonInfo->rect.x <= BRIDGE_WIDTH)
+            cannonInfo->speed = CANNON_SPEED;
 
         SDL_Delay(10);
     }
