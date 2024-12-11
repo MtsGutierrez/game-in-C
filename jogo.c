@@ -22,6 +22,8 @@ const int CANNON_HEIGHT = 50;
 const int HELICOPTER_WIDTH = 150;
 const int HELICOPTER_HEIGHT = 75;
 const int EXPLOSION_SIZE = 75;
+const int HELICOPTER_SPEED = 3;
+const int CANNON_SPEED = 2;
 
 int RELOAD_TIME_FOR_EACH_MISSILE = 500; // milisegundos
 
@@ -193,20 +195,12 @@ int main(int argc, char *argv[])
         };
     }
     
-    free(cannon1Info.missiles);
-    free(cannon2Info.missiles);
     free(helicopterInfo.fixed_collision_rects);
-    free(helicopterInfo.missile_collision_rects);
 
     // Destrói as threads
     pthread_cancel(thread_cannon1);
     pthread_cancel(thread_cannon2);
     pthread_cancel(thread_helicopter);
-
-    sem_destroy(&cannon1Info.ammunition_semaphore_empty);
-    sem_destroy(&cannon2Info.ammunition_semaphore_empty);
-    sem_destroy(&cannon1Info.ammunition_semaphore_full);
-    sem_destroy(&cannon2Info.ammunition_semaphore_full);
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

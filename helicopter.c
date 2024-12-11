@@ -21,8 +21,6 @@ HelicopterInfo createHelicopter(int x, int y, int w, int h, int speed, SDL_Rect 
     helicopterInfo.rect.h = h;
     helicopterInfo.speed = speed;
     helicopterInfo.fixed_collision_rects = collisionRectArray;
-    helicopterInfo.missile_collision_rects = (MissileInfo **)malloc(sizeof(MissileInfo *) * AMMUNITION);
-    helicopterInfo.num_missile_collision_rects = 0;
     helicopterInfo.currentMovement = 0;
     return helicopterInfo;
 }
@@ -69,7 +67,7 @@ void checkHelicopterCollisions(SDL_Rect helicopterRect, SDL_Rect *rects[], int r
     }
 }
 
-// Função concorrente para mover o helicóptero que é controlado pelo usuário
+// Função concorrente para mover o helicótero que é controlado pelo usuário
 void *moveHelicopter(void *arg)
 {
     HelicopterInfo *helicopterInfo = (HelicopterInfo *)arg;

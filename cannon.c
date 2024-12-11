@@ -30,21 +30,6 @@ CannonInfo createCannon(int x, int y, int w, int h, int initialAmmunition)
     cannonInfo.rect.w = w;
     cannonInfo.rect.h = h;
     cannonInfo.speed = CANNON_SPEED;
-    cannonInfo.lastShotTime = SDL_GetTicks();
-    cannonInfo.numActiveMissiles = 0;
-    cannonInfo.missiles = (MissileInfo *)malloc(sizeof(MissileInfo) * AMMUNITION);
-    cannonInfo.ammunition = initialAmmunition;
-
-    sem_t sem_empty, ammo_sem;
-    sem_init(&sem_empty, 0, 0);
-    sem_init(&ammo_sem, 0, 1);
-
-    cannonInfo.ammunition_semaphore_empty = sem_empty;
-    cannonInfo.ammunition_semaphore_full = ammo_sem;
-
-    pthread_mutex_t lock;
-    cannonInfo.reloadingLock = lock;
-
     return cannonInfo;
 }
 
@@ -155,6 +140,6 @@ void drawCannon(CannonInfo *cannon, SDL_Renderer* renderer) {
     Uint32 ticks = SDL_GetTicks();
     Uint32 ms = ticks / 200;
     
-    SDL_Rect srcrect = {(ms % 3) * 50, 225 - ((cannon->ammunition * 9) / AMMUNITION) * 25, 50, 25 };
+    SDL_Rect srcrect = {(ms % 3) * 50, 0, 50, 25};
     SDL_RenderCopy(renderer, cannon->texture, &srcrect, &cannon->rect);
 }

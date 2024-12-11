@@ -21,14 +21,7 @@ typedef struct
     SDL_Rect rect;
     int speed;
     SDL_Rect **fixed_collision_rects;
-    MissileInfo **missile_collision_rects;
-    int num_missile_collision_rects;
     SDL_Texture *texture;
-    /**
-     * 0 - Parado
-     * 1 - Andando pra esquerda
-     * 2 - Andando pra direita
-    */
     int currentMovement;
 } HelicopterInfo;
 
