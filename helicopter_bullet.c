@@ -9,6 +9,8 @@
 
 extern int SCREEN_WIDTH;
 extern int BULLET_EXPLOSION_SIZE;
+extern bool thread_dino1_active;
+extern bool thread_dino2_active;
 
 BulletInfo bullets[MAX_BULLETS];
 int activeBullets = 0;
@@ -76,7 +78,7 @@ void drawBullets(SDL_Renderer *renderer) {
 void checkBulletCollisions(DinoInfo *dino1, DinoInfo *dino2, SDL_Renderer *renderer) {
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (bullets[i].active) {
-            if (SDL_HasIntersection(&bullets[i].rect, &dino1->rect)) {
+            if (SDL_HasIntersection(&bullets[i].rect, &dino1->rect) && dino1->alive) {
                 drawExplosion(
                     renderer,
                     bullets[i].rect.x + (bullets[i].rect.w / 2),
@@ -85,8 +87,10 @@ void checkBulletCollisions(DinoInfo *dino1, DinoInfo *dino2, SDL_Renderer *rende
                 );
                 bullets[i].active = false;
                 activeBullets--;
+                dino1->alive = false;
+                thread_dino1_active = false;  // Marca a thread como inativa
             }
-            else if (SDL_HasIntersection(&bullets[i].rect, &dino2->rect)) {
+            else if (SDL_HasIntersection(&bullets[i].rect, &dino2->rect) && dino2->alive) {
                 drawExplosion(
                     renderer,
                     bullets[i].rect.x + (bullets[i].rect.w / 2),
@@ -95,6 +99,8 @@ void checkBulletCollisions(DinoInfo *dino1, DinoInfo *dino2, SDL_Renderer *rende
                 );
                 bullets[i].active = false;
                 activeBullets--;
+                dino2->alive = false;
+                thread_dino2_active = false;  // Marca a thread como inativa
             }
         }
     }

@@ -20,6 +20,7 @@ DinoInfo createDino(int x, int y, int w, int h)
     dinoInfo.speed = DINO_SPEED;
     dinoInfo.currentFrame = 0;
     dinoInfo.facingLeft = false;
+    dinoInfo.alive = true;
     return dinoInfo;
 }
 
@@ -31,6 +32,10 @@ void *moveDino(void *arg)
 
     while (1)
     {
+        if (!dinoInfo->alive) {
+            pthread_exit(NULL);  // Termina a thread quando o dino morre
+        }
+
         // Atualiza a posição do dinossauro
         dinoInfo->rect.x += dinoInfo->speed;
 
@@ -56,10 +61,11 @@ void loadDinoSprite(DinoInfo *dino, SDL_Renderer* renderer) {
 }
 
 void drawDino(DinoInfo *dino, SDL_Renderer* renderer) {	
-    Uint32 ticks = SDL_GetTicks();
-    Uint32 sprite = (ticks / 100) % 6; // 6 frames, mudando a cada 100ms
+    if (!dino->alive) return;  // Não desenha se estiver morto
     
-    // Cada frame tem 100x100 pixels no spritesheet
+    Uint32 ticks = SDL_GetTicks();
+    Uint32 sprite = (ticks / 100) % 6;
+    
     SDL_Rect srcrect = {sprite * 100, 0, 100, 100};
     SDL_RendererFlip flip = dino->facingLeft ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
     

@@ -14,6 +14,7 @@ typedef struct
     SDL_Texture *texture;
     int currentFrame; // Para controlar a animação
     bool facingLeft; // Para controlar a direção que o dino está olhando
+    bool alive;  // Novo campo para controlar se o dino está vivo
 } DinoInfo;
 
 typedef struct

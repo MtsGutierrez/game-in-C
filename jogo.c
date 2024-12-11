@@ -174,7 +174,10 @@ int main(int argc, char *argv[])
     pthread_create(&thread_dino2, NULL, moveDino, &paramsDino2);                    // thread do dinossauro 2
     pthread_create(&thread_helicopter, NULL, moveHelicopter, &helicopterInfo);            // thread do helicóptero
 
-    
+    // Criar variáveis para controlar o estado das threads
+    bool thread_dino1_active = true;
+    bool thread_dino2_active = true;
+
     int quit = 0;
     SDL_Event e;
 
@@ -213,8 +216,10 @@ int main(int argc, char *argv[])
     free(helicopterInfo.fixed_collision_rects);
 
     // Destrói as threads
-    pthread_cancel(thread_dino1);
-    pthread_cancel(thread_dino2);
+    if (thread_dino1_active && dino1Info.alive)
+        pthread_cancel(thread_dino1);
+    if (thread_dino2_active && dino2Info.alive)
+        pthread_cancel(thread_dino2);
     pthread_cancel(thread_helicopter);
 
     SDL_DestroyRenderer(renderer);
