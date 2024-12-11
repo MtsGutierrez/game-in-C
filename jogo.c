@@ -25,6 +25,7 @@ const int HELICOPTER_HEIGHT = 75;
 const int EXPLOSION_SIZE = 75;
 const int HELICOPTER_SPEED = 3;
 const int DINO_SPEED = 3;
+const int BULLET_EXPLOSION_SIZE = 50;  // Tamanho da explosão do projétil
 
 bool destroyed = false;
 bool gameover = false;
@@ -198,7 +199,7 @@ int main(int argc, char *argv[])
 
         if (!gameover) {
             moveBullets();
-            checkBulletCollisions(&dino1Info, &dino2Info);
+            checkBulletCollisions(&dino1Info, &dino2Info, renderer);
             render(renderer, &dino1Info, &dino2Info, &helicopterInfo);
         }
         else 

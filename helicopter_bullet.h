@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "helicopter.h"
 #include "dino.h"
+#include "scenario.h"
 
 #define MAX_BULLETS 10  // Número máximo de projéteis ativos ao mesmo tempo
 
@@ -24,7 +25,7 @@ void initBullets(SDL_Renderer *renderer);
 void createBullet(HelicopterInfo *helicopter, SDL_Renderer *renderer);
 void moveBullets(void);
 void drawBullets(SDL_Renderer *renderer);
-void checkBulletCollisions(DinoInfo *dino1, DinoInfo *dino2);
+void checkBulletCollisions(DinoInfo *dino1, DinoInfo *dino2, SDL_Renderer *renderer);
 void cleanupBullets(void);
 
 #endif 

@@ -5,8 +5,10 @@
 #include "helicopter_bullet.h"
 #include "helicopter.h"
 #include "dino.h"
+#include "scenario.h"
 
 extern int SCREEN_WIDTH;
+extern int BULLET_EXPLOSION_SIZE;
 
 BulletInfo bullets[MAX_BULLETS];
 int activeBullets = 0;
@@ -71,14 +73,28 @@ void drawBullets(SDL_Renderer *renderer) {
     }
 }
 
-void checkBulletCollisions(DinoInfo *dino1, DinoInfo *dino2) {
+void checkBulletCollisions(DinoInfo *dino1, DinoInfo *dino2, SDL_Renderer *renderer) {
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (bullets[i].active) {
-            if (SDL_HasIntersection(&bullets[i].rect, &dino1->rect) ||
-                SDL_HasIntersection(&bullets[i].rect, &dino2->rect)) {
+            if (SDL_HasIntersection(&bullets[i].rect, &dino1->rect)) {
+                drawExplosion(
+                    renderer,
+                    bullets[i].rect.x + (bullets[i].rect.w / 2),
+                    bullets[i].rect.y + (bullets[i].rect.h / 2),
+                    BULLET_EXPLOSION_SIZE
+                );
                 bullets[i].active = false;
                 activeBullets--;
-                // Aqui você pode adicionar lógica adicional quando um dinossauro �� atingido
+            }
+            else if (SDL_HasIntersection(&bullets[i].rect, &dino2->rect)) {
+                drawExplosion(
+                    renderer,
+                    bullets[i].rect.x + (bullets[i].rect.w / 2),
+                    bullets[i].rect.y + (bullets[i].rect.h / 2),
+                    BULLET_EXPLOSION_SIZE
+                );
+                bullets[i].active = false;
+                activeBullets--;
             }
         }
     }

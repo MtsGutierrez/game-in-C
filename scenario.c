@@ -20,7 +20,7 @@ ScenarioElementInfo createScenarioElement(int x, int y, int w, int h)
     return rectInfo;
 }
 
-void drawExplosion(SDL_Renderer* renderer, int x, int y)
+void drawExplosion(SDL_Renderer* renderer, int x, int y, int size)
 {
     SDL_Surface* image = IMG_Load("sprites/explosion_spritesheet.png");
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, image);
@@ -28,11 +28,14 @@ void drawExplosion(SDL_Renderer* renderer, int x, int y)
     for (int i = 0; i < 4; i++)
     {
         SDL_Rect srcrect = {i * 32, 0, 32, 32};
-        SDL_Rect dstrect = { x, y, EXPLOSION_SIZE, EXPLOSION_SIZE};
+        SDL_Rect dstrect = { x - size/2, y - size/2, size, size};
         SDL_RenderCopy(renderer, texture, &srcrect, &dstrect);
         SDL_RenderPresent(renderer);
         SDL_Delay(100);
     }
+    
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(image);
 }
 
 void loadScenarioSpritesheet(SDL_Renderer* renderer, ScenarioElementInfo *scenarioElement, char *spritesheet)

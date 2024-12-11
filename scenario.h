@@ -11,7 +11,7 @@ typedef struct
 } ScenarioElementInfo;
 
 ScenarioElementInfo createScenarioElement(int x, int y, int w, int h);
-void drawExplosion(SDL_Renderer* renderer, int x, int y);
+void drawExplosion(SDL_Renderer* renderer, int x, int y, int size);
 
 void loadScenarioSpritesheet(SDL_Renderer* renderer, ScenarioElementInfo* scenarioElement, char* spritesheet);
 void drawScenarioElement(SDL_Renderer* renderer, ScenarioElementInfo* scenarioElement);
