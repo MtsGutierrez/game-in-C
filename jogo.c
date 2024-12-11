@@ -27,14 +27,11 @@ const int CANNON_SPEED = 2;
 
 int RELOAD_TIME_FOR_EACH_MISSILE = 500; // milisegundos
 
-pthread_mutex_t bridgeMutex = PTHREAD_MUTEX_INITIALIZER;
-
 bool destroyed = false;
 bool gameover = false;
 
 ScenarioElementInfo background;
 ScenarioElementInfo groundInfo;
-ScenarioElementInfo bridgeInfo;
 
 // Função pra renderizar os objetos
 // Isso não pode ser concorrente porque a tela que o usuário vê é uma zona de exclusão mútua
@@ -45,7 +42,6 @@ void render(SDL_Renderer *renderer, CannonInfo *cannon1Info, CannonInfo *cannon2
     
     drawScenarioElement(renderer, &background);
     drawScenarioElement(renderer, &groundInfo);
-    drawScenarioElement(renderer, &bridgeInfo);
 
     drawCannon(cannon1Info, renderer);
     drawCannon(cannon2Info, renderer);
@@ -125,15 +121,26 @@ int main(int argc, char *argv[])
     // Cria os elementos do cenário
     background = createScenarioElement(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     groundInfo = createScenarioElement(0, SCREEN_HEIGHT - GROUND_HEIGHT, SCREEN_WIDTH, GROUND_HEIGHT);
-    bridgeInfo = createScenarioElement(BRIDGE_WIDTH, SCREEN_HEIGHT - BRIDGE_HEIGHT, BRIDGE_WIDTH, BRIDGE_HEIGHT);
 
     loadScenarioSpritesheet(renderer, &background, "sprites/background_spritesheet.png");
     loadScenarioSpritesheet(renderer, &groundInfo, "sprites/ground_spritesheet.png");
-    loadScenarioSpritesheet(renderer, &bridgeInfo, "sprites/bridge_spritesheet.png");
 
     // Cria os canhões
-    CannonInfo cannon1Info = createCannon(BRIDGE_WIDTH + CANNON_WIDTH * 2, SCREEN_HEIGHT - BRIDGE_HEIGHT - CANNON_HEIGHT, CANNON_WIDTH, CANNON_HEIGHT, 0);
-    CannonInfo cannon2Info = createCannon(BRIDGE_WIDTH + CANNON_WIDTH, SCREEN_HEIGHT - BRIDGE_HEIGHT - CANNON_HEIGHT, CANNON_WIDTH, CANNON_HEIGHT, 0);
+    CannonInfo cannon1Info = createCannon(
+        SCREEN_WIDTH/3, 
+        SCREEN_HEIGHT - GROUND_HEIGHT - CANNON_HEIGHT, 
+        CANNON_WIDTH, 
+        CANNON_HEIGHT, 
+        0
+    );
+
+    CannonInfo cannon2Info = createCannon(
+        2*SCREEN_WIDTH/3, 
+        SCREEN_HEIGHT - GROUND_HEIGHT - CANNON_HEIGHT, 
+        CANNON_WIDTH, 
+        CANNON_HEIGHT, 
+        0
+    );
     
     loadCannonSprite(&cannon1Info, renderer);
     loadCannonSprite(&cannon2Info, renderer);

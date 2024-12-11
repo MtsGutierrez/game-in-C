@@ -13,7 +13,6 @@ extern int CANNON_WIDTH;
 extern int MIN_COOLDOWN_TIME;
 extern int MAX_COOLDOWN_TIME;
 extern int SCREEN_WIDTH;
-extern int BRIDGE_WIDTH;
 extern int MISSILE_WIDTH;
 extern int MISSILE_HEIGHT;
 extern int MISSILE_SPEED;
@@ -41,29 +40,13 @@ void *moveCannon(void *arg)
 
     while (1)
     {
-        // Verifica se o canhão está em cima da ponte
-        if (cannonInfo->rect.x + CANNON_WIDTH > 0 && cannonInfo->rect.x < BRIDGE_WIDTH)
-        {
-            pthread_mutex_lock(&bridgeMutex);
-
-            while (
-                cannonInfo->rect.x + CANNON_WIDTH > 0 &&
-                cannonInfo->rect.x < BRIDGE_WIDTH)
-            {
-                cannonInfo->rect.x += abs(cannonInfo->speed);
-                SDL_Delay(10);
-            }
-
-            pthread_mutex_unlock(&bridgeMutex);
-        }
-
         // Atualiza a posição do canhão
         cannonInfo->rect.x += cannonInfo->speed;
 
         // Se o canhão alcançar os limites, inverte a direção
         if (cannonInfo->rect.x + CANNON_WIDTH > SCREEN_WIDTH)
             cannonInfo->speed = -CANNON_SPEED;
-        else if (cannonInfo->rect.x <= BRIDGE_WIDTH)
+        else if (cannonInfo->rect.x <= 0)
             cannonInfo->speed = CANNON_SPEED;
 
         SDL_Delay(10);
