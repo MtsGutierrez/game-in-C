@@ -6,6 +6,8 @@
 #include "helicopter.h"
 #include "dino.h"
 
+extern int SCREEN_WIDTH;
+
 BulletInfo bullets[MAX_BULLETS];
 int activeBullets = 0;
 const int BULLET_SPEED = 10;
@@ -76,7 +78,7 @@ void checkBulletCollisions(DinoInfo *dino1, DinoInfo *dino2) {
                 SDL_HasIntersection(&bullets[i].rect, &dino2->rect)) {
                 bullets[i].active = false;
                 activeBullets--;
-                // Aqui você pode adicionar lógica adicional quando um dinossauro é atingido
+                // Aqui você pode adicionar lógica adicional quando um dinossauro �� atingido
             }
         }
     }

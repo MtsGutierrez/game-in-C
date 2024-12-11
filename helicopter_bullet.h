@@ -4,6 +4,7 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 #include "helicopter.h"
+#include "dino.h"
 
 #define MAX_BULLETS 10  // Número máximo de projéteis ativos ao mesmo tempo
 
