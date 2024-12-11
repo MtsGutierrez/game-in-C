@@ -29,6 +29,8 @@ const int BULLET_EXPLOSION_SIZE = 50;  // Tamanho da explosão do projétil
 
 bool destroyed = false;
 bool gameover = false;
+bool thread_dino1_active = true;
+bool thread_dino2_active = true;
 
 ScenarioElementInfo background;
 ScenarioElementInfo groundInfo;
@@ -173,10 +175,6 @@ int main(int argc, char *argv[])
     pthread_create(&thread_dino1, NULL, moveDino, &paramsDino1);                    // thread do dinossauro 1
     pthread_create(&thread_dino2, NULL, moveDino, &paramsDino2);                    // thread do dinossauro 2
     pthread_create(&thread_helicopter, NULL, moveHelicopter, &helicopterInfo);            // thread do helicóptero
-
-    // Criar variáveis para controlar o estado das threads
-    bool thread_dino1_active = true;
-    bool thread_dino2_active = true;
 
     int quit = 0;
     SDL_Event e;
