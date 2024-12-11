@@ -10,6 +10,7 @@
 #include "helicopter.h"
 #include "dino.h"
 #include "scenario.h"
+#include "helicopter_bullet.h"
 
 // Constantes
 const int SCREEN_WIDTH = 1100;
@@ -54,6 +55,8 @@ void render(SDL_Renderer *renderer, DinoInfo *dino1Info, DinoInfo *dino2Info, He
         gameover = true;
     }
     else drawHelicopter(helicopterInfo, renderer);
+
+    drawBullets(renderer);
 
     // Atualiza a tela
     SDL_RenderPresent(renderer);
@@ -173,6 +176,8 @@ int main(int argc, char *argv[])
     int quit = 0;
     SDL_Event e;
 
+    initBullets(renderer);
+
     while (!quit)
     {
         // Escuta o evento pra fechar a tela do jogo
@@ -182,9 +187,18 @@ int main(int argc, char *argv[])
             {
                 quit = 1;
             }
+            else if (e.type == SDL_KEYDOWN)
+            {
+                if (e.key.keysym.sym == SDLK_SPACE)
+                {
+                    createBullet(&helicopterInfo, renderer);
+                }
+            }
         }
 
         if (!gameover) {
+            moveBullets();
+            checkBulletCollisions(&dino1Info, &dino2Info);
             render(renderer, &dino1Info, &dino2Info, &helicopterInfo);
         }
         else 
@@ -204,6 +218,8 @@ int main(int argc, char *argv[])
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
+    cleanupBullets();
 
     return 0;
 }

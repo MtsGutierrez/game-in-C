@@ -75,7 +75,7 @@ void *moveHelicopter(void *arg)
             helicopterInfo->rect.y += helicopterInfo->speed;
         }
 
-        // checa colisão com canhões e objetos do cenário
+        // checa colisão com dinossauros e objetos do cenário
         checkHelicopterCollisions(
             helicopterInfo->rect,
             helicopterInfo->fixed_collision_rects,
