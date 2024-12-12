@@ -178,11 +178,16 @@ int main(int argc, char *argv[])
     );
     loadHelicopterSprite(&helicopterInfo, renderer);
    
+    // Criar threads dos dinossauros
     for (int i = 0; i < manager->numDinos; i++) {
         manager->threadParams[i].helicopterInfo = &helicopterInfo;
         manager->threadParams[i].dinoInfo = &manager->dinos[i];
         pthread_create(&manager->threads[i], NULL, moveDino, &manager->threadParams[i]);
     }
+
+    // Adicionar a thread do helicóptero
+    pthread_t thread_helicopter;
+    pthread_create(&thread_helicopter, NULL, moveHelicopter, &helicopterInfo);
 
     int quit = 0;
     SDL_Event e;
@@ -222,11 +227,11 @@ int main(int argc, char *argv[])
     free(helicopterInfo.fixed_collision_rects);
 
     // Destrói as threads
-    if (thread_dino1_active && manager->dinos[0].alive)
-        pthread_cancel(manager->threads[0]);
-    if (thread_dino2_active && manager->dinos[1].alive)
-        pthread_cancel(manager->threads[1]);
-    pthread_cancel(manager->threads[2]);
+    for (int i = 0; i < manager->numDinos; i++) {
+        if (manager->threadActives[i] && manager->dinos[i].alive)
+            pthread_cancel(manager->threads[i]);
+    }
+    pthread_cancel(thread_helicopter);  // Cancela a thread do helicóptero
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
