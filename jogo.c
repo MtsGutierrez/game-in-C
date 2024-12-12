@@ -37,7 +37,7 @@ ScenarioElementInfo groundInfo;
 
 // Função pra renderizar os objetos
 // Isso não pode ser concorrente porque a tela que o usuário vê é uma zona de exclusão mútua
-void render(SDL_Renderer *renderer, DinoInfo *dino1Info, DinoInfo *dino2Info, HelicopterInfo *helicopterInfo)
+void render(SDL_Renderer *renderer, DinoManager* manager, HelicopterInfo *helicopterInfo)
 {
     // Limpa a tela
     SDL_RenderClear(renderer);
@@ -45,8 +45,10 @@ void render(SDL_Renderer *renderer, DinoInfo *dino1Info, DinoInfo *dino2Info, He
     drawScenarioElement(renderer, &background);
     drawScenarioElement(renderer, &groundInfo);
 
-    drawDino(dino1Info, renderer);
-    drawDino(dino2Info, renderer);
+    // Desenha todos os dinossauros
+    for (int i = 0; i < manager->numDinos; i++) {
+        drawDino(&manager->dinos[i], renderer);
+    }
 
     if (destroyed) 
     {
@@ -94,18 +96,21 @@ int getDifficultyChoice() {
 
 void setupDifficulty(int difficulty, DinoManager* manager) {
     switch(difficulty) {
-        case 1: // Fácil
+        case 1: // Fácil - 2 dinos mais lentos
+            DINO_SPEED = 2;
             addDino(manager, SCREEN_WIDTH/3);
             addDino(manager, 2*SCREEN_WIDTH/3);
             break;
             
-        case 2: // Médio
+        case 2: // Médio - 3 dinos com velocidade normal
+            DINO_SPEED = 3;
             addDino(manager, SCREEN_WIDTH/4);
             addDino(manager, 2*SCREEN_WIDTH/4);
             addDino(manager, 3*SCREEN_WIDTH/4);
             break;
             
-        case 3: // Difícil
+        case 3: // Difícil - 2 dinos iniciais mais rápidos + spawn de novos
+            DINO_SPEED = 4;
             addDino(manager, SCREEN_WIDTH/3);
             addDino(manager, 2*SCREEN_WIDTH/3);
             
@@ -173,19 +178,11 @@ int main(int argc, char *argv[])
     );
     loadHelicopterSprite(&helicopterInfo, renderer);
    
-    MoveDinoThreadParams paramsDino1;
-    paramsDino1.helicopterInfo = &helicopterInfo;
-    paramsDino1.dinoInfo = &manager->dinos[0];
-
-    MoveDinoThreadParams paramsDino2;
-    paramsDino2.helicopterInfo = &helicopterInfo;
-    paramsDino2.dinoInfo = &manager->dinos[1];
-
-    // Inicializa as threads
-    pthread_t thread_dino1, thread_dino2, thread_helicopter;
-    pthread_create(&thread_dino1, NULL, moveDino, &paramsDino1);                    // thread do dinossauro 1
-    pthread_create(&thread_dino2, NULL, moveDino, &paramsDino2);                    // thread do dinossauro 2
-    pthread_create(&thread_helicopter, NULL, moveHelicopter, &helicopterInfo);            // thread do helicóptero
+    for (int i = 0; i < manager->numDinos; i++) {
+        manager->threadParams[i].helicopterInfo = &helicopterInfo;
+        manager->threadParams[i].dinoInfo = &manager->dinos[i];
+        pthread_create(&manager->threads[i], NULL, moveDino, &manager->threadParams[i]);
+    }
 
     int quit = 0;
     SDL_Event e;
@@ -212,8 +209,8 @@ int main(int argc, char *argv[])
 
         if (!gameover) {
             moveBullets();
-            checkBulletCollisions(&manager->dinos[0], &manager->dinos[1], renderer);
-            render(renderer, &manager->dinos[0], &manager->dinos[1], &helicopterInfo);
+            checkBulletCollisions(manager, renderer);
+            render(renderer, manager, &helicopterInfo);
         }
         else 
         {
@@ -226,10 +223,10 @@ int main(int argc, char *argv[])
 
     // Destrói as threads
     if (thread_dino1_active && manager->dinos[0].alive)
-        pthread_cancel(thread_dino1);
+        pthread_cancel(manager->threads[0]);
     if (thread_dino2_active && manager->dinos[1].alive)
-        pthread_cancel(thread_dino2);
-    pthread_cancel(thread_helicopter);
+        pthread_cancel(manager->threads[1]);
+    pthread_cancel(manager->threads[2]);
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

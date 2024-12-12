@@ -75,32 +75,24 @@ void drawBullets(SDL_Renderer *renderer) {
     }
 }
 
-void checkBulletCollisions(DinoInfo *dino1, DinoInfo *dino2, SDL_Renderer *renderer) {
+void checkBulletCollisions(DinoManager* manager, SDL_Renderer *renderer) {
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (bullets[i].active) {
-            if (SDL_HasIntersection(&bullets[i].rect, &dino1->rect) && dino1->alive) {
-                drawExplosion(
-                    renderer,
-                    bullets[i].rect.x + (bullets[i].rect.w / 2),
-                    bullets[i].rect.y + (bullets[i].rect.h / 2),
-                    BULLET_EXPLOSION_SIZE
-                );
-                bullets[i].active = false;
-                activeBullets--;
-                dino1->alive = false;
-                thread_dino1_active = false;  // Marca a thread como inativa
-            }
-            else if (SDL_HasIntersection(&bullets[i].rect, &dino2->rect) && dino2->alive) {
-                drawExplosion(
-                    renderer,
-                    bullets[i].rect.x + (bullets[i].rect.w / 2),
-                    bullets[i].rect.y + (bullets[i].rect.h / 2),
-                    BULLET_EXPLOSION_SIZE
-                );
-                bullets[i].active = false;
-                activeBullets--;
-                dino2->alive = false;
-                thread_dino2_active = false;  // Marca a thread como inativa
+            for (int j = 0; j < manager->numDinos; j++) {
+                if (manager->dinos[j].alive && 
+                    SDL_HasIntersection(&bullets[i].rect, &manager->dinos[j].rect)) {
+                    drawExplosion(
+                        renderer,
+                        bullets[i].rect.x + (bullets[i].rect.w / 2),
+                        bullets[i].rect.y + (bullets[i].rect.h / 2),
+                        BULLET_EXPLOSION_SIZE
+                    );
+                    bullets[i].active = false;
+                    activeBullets--;
+                    manager->dinos[j].alive = false;
+                    manager->threadActives[j] = false;
+                    break;
+                }
             }
         }
     }
