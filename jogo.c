@@ -24,7 +24,7 @@ const int HELICOPTER_WIDTH = 150;
 const int HELICOPTER_HEIGHT = 75;
 const int EXPLOSION_SIZE = 75;
 const int HELICOPTER_SPEED = 3;
-const int DINO_SPEED = 3;
+int DINO_SPEED = 3;  // Velocidade inicial padrão
 const int BULLET_EXPLOSION_SIZE = 50;  // Tamanho da explosão do projétil
 
 bool destroyed = false;
