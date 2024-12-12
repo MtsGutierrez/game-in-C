@@ -116,18 +116,6 @@ void setupDifficulty(int difficulty, DinoManager* manager) {
     }
 }
 
-void* spawnNewDinos(void* arg) {
-    DinoManager* manager = (DinoManager*)arg;
-    while (1) {
-        SDL_Delay(10000); // 10 segundos
-        if (manager->numDinos < manager->maxDinos) {
-            int x = rand() % (SCREEN_WIDTH - DINO_WIDTH);
-            addDino(manager, x);
-        }
-    }
-    return NULL;
-}
-
 int main(int argc, char *argv[])
 {
     int difficulty = getDifficultyChoice();
